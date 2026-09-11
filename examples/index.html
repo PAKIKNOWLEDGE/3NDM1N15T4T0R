@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<!-- 防止暗色/亮色切换时闪白：在任何渲染前先套用已保存的主题 -->
+<script>(function(){try{var t=localStorage.getItem("el-demo-theme");if(t)document.documentElement.setAttribute("data-theme",t)}catch(e){}})();</script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3NDM1N15T4T0R · Endfield 设计语言样例</title>
+<meta name="color-scheme" content="light dark">
+<style>
+/* ============ 1. 设计令牌（tokens.json 的可执行版本） ============ */
+:root{
+  --paper:#e8e8e2; --panel:#f2f2ec; --card:#dcddd6;
+  --ink:#101110; --muted:#4a4c48; --line:#d8d9d5;
+  --accent:#6b5d00;                 /* 亮色态：强调色已“下潜”为深色，保证文字对比度 */
+  --shadow:rgba(16,17,16,.10); color-scheme:light;
+  --cols:3;
+}
+:root[data-theme="light"]{
+  --paper:#e8e8e2; --panel:#f2f2ec; --card:#dcddd6; --ink:#101110; --muted:#4a4c48;
+  --line:#d8d9d5; --accent:#6b5d00; --shadow:rgba(16,17,16,.10); color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --paper:#101110; --panel:#181a18; --card:#1e201d; --ink:#f5f5f0; --muted:#898d89;
+  --line:#343633; --accent:#fff500; --shadow:rgba(0,0,0,.5); color-scheme:dark;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#101110; --panel:#181a18; --card:#1e201d; --ink:#f5f5f0; --muted:#898d89;
+    --line:#343633; --accent:#fff500; --shadow:rgba(0,0,0,.5); color-scheme:dark;
+    /* 暗色态可选：28px 工业网格底纹（亮色态为纯纸色，不加纹理） */
+    background-image:
+      repeating-linear-gradient(0deg,rgba(245,245,240,.03) 0,rgba(245,245,240,.03) 1px,transparent 1px,transparent 28px),
+      repeating-linear-gradient(90deg,rgba(245,245,240,.03) 0,rgba(245,245,240,.03) 1px,transparent 1px,transparent 28px);
+  }
+}
+
+/* ============ 2. 内嵌字体（子集 woff2，见 assets/fonts 授权） ============ */
+@font-face{font-family:"HarmonyOS Sans SC";
+  src:url(../assets/fonts/HarmonyOS_Sans_SC_Regular.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"HarmonyOS Sans SC";
+  src:url(../assets/fonts/HarmonyOS_Sans_SC_Bold.woff2) format("woff2");font-weight:700;font-display:swap}
+
+/* ============ 3. 基础 ============ */
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper);color:var(--ink);
+  font-family:"HarmonyOS Sans SC",MiSans,ui-monospace,"Cascadia Mono",Consolas,Menlo,monospace;
+  font-size:14px;line-height:1.65;
+}
+a{color:inherit;text-decoration:none}
+a:hover{color:var(--accent)}
+.wrap{max-width:1180px;margin:0 auto;padding:18px 16px 40px}
+
+/* 交互态四件套：selection / focus / 细滚动条 / hover 反白 */
+::selection{background:var(--accent);color:var(--paper)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+*{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-thumb{background:var(--line)}
+::-webkit-scrollbar-track{background:transparent}
+
+/* ============ 4. 布局骨架 ============ */
+.topbar{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  border:1px solid var(--line);padding:8px 14px;font-size:11px;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.topbar b{color:var(--accent);font-weight:400}
+nav{display:flex;gap:2px;margin-top:10px;flex-wrap:wrap}
+nav a{border:1px solid var(--line);border-bottom:none;padding:6px 14px;font-size:11px;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--muted);background:var(--panel)}
+nav a.on{color:var(--accent)}
+nav a:hover{background:var(--accent);border-color:var(--accent);color:var(--ink)} /* 实心反白 */
+.tbtn{background:none;border:1px solid var(--line);color:var(--muted);font:inherit;font-size:11px;
+  letter-spacing:.12em;padding:2px 8px;cursor:pointer;text-transform:uppercase}
+.tbtn:hover{background:var(--accent);border-color:var(--accent);color:var(--ink)}
+
+.hero{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;margin-top:14px}
+.clock{font-family:"Arial Black","HarmonyOS Sans SC",Arial,sans-serif;font-weight:900;
+  font-size:34px;letter-spacing:.02em;font-variant-numeric:tabular-nums}
+.clock small{display:block;text-align:right;font-family:inherit;font-weight:400;
+  font-size:12px;letter-spacing:.14em;color:var(--muted)}
+
+.grid{display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));
+  gap:14px;margin-top:14px;align-items:start}
+@media(max-width:920px){.grid{grid-template-columns:1fr}}
+
+/* ============ 5. 面板：刻度尺 + 幽灵大字（装饰三件套之二） ============ */
+.panel{position:relative;overflow:hidden;background:var(--panel);
+  border:1px solid var(--line);box-shadow:0 1px 0 var(--shadow);padding:16px 18px}
+.panel::before{ /* 左缘竖向刻度尺：1px 线 / 10px 间距 */
+  content:"";position:absolute;left:0;top:0;bottom:0;width:5px;opacity:.75;pointer-events:none;
+  background:repeating-linear-gradient(to bottom,var(--line) 0,var(--line) 1px,transparent 1px,transparent 10px)}
+.panel::after{ /* 底边裁切幽灵大字：容器 overflow:hidden 裁掉下半截 */
+  content:attr(data-word);position:absolute;right:12px;bottom:-.36em;
+  font-family:"Arial Black",Arial,sans-serif;font-weight:900;font-size:46px;line-height:1;
+  letter-spacing:.04em;color:var(--ink);opacity:.055;pointer-events:none;white-space:nowrap}
+
+.label{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+  border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:12px}
+.label::before{content:"[";color:var(--accent);margin-right:5px}  /* 方括号标题 */
+.label::after{content:"]";color:var(--accent);margin-left:5px}
+.label b{color:var(--accent);font-weight:400}
+
+.stat{display:flex;justify-content:space-between;padding:5px 0;font-size:13px}
+.stat .n{color:var(--accent);font-variant-numeric:tabular-nums}
+
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+  padding:8px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:none}
+.row>div{min-width:0}
+.row .t{font-size:16px;overflow-wrap:anywhere}
+.row .m{font-size:11px;color:var(--muted);white-space:nowrap;letter-spacing:.06em}
+.row>*:last-child{flex-shrink:0}
+.tag{font-size:11px;color:var(--muted);margin-right:6px}
+.tag::before{content:"#"}
+.date{font-size:11px;color:var(--muted);margin-right:6px;font-variant-numeric:tabular-nums}
+.done .t{text-decoration:line-through;color:var(--muted)}
+.overdue{color:#b3261e}
+
+.statusbar{margin-top:16px;border:1px solid var(--line);border-bottom:3px solid var(--accent);
+  padding:7px 14px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
+  display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+
+/* ============ 6. 启动加载动画（招牌动效） ============ */
+.eloader{position:fixed;inset:0;z-index:2147483000;background:#0a0b0a;pointer-events:none}
+.eloader .erail{position:absolute;left:0;top:0;width:10px;height:0;background:#fff500}
+.eloader .eread{position:absolute;left:22px;top:0;transform:translateY(-50%);
+  font:11px ui-monospace,Consolas,monospace;letter-spacing:.14em;color:#f5f5f0;white-space:nowrap}
+.eloader .ebrand{position:absolute;right:6vw;top:50%;transform:translateY(-50%);
+  font-family:"Arial Black",Arial,sans-serif;font-weight:900;
+  font-size:clamp(26px,5.2vh,64px);line-height:.95;letter-spacing:.02em;color:#f5f5f0;text-align:left}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <span><b>ENDMINISTRATOR</b> // DESIGN LANGUAGE DEMO</span>
+    <span>6 SIGNALS &nbsp;
+      <button class="tbtn" id="densitybtn">DENSITY: 3</button>
+      <button class="tbtn" id="themebtn">THEME</button>
+      <button class="tbtn" id="replaybtn">REPLAY LOADER</button>
+    </span>
+  </div>
+
+  <nav>
+    <a class="on" href="#">INDEX</a><a href="#">INBOX</a><a href="#">TODO</a>
+    <a href="#">IDEAS</a><a href="#">NOTES</a>
+  </nav>
+
+  <div class="panel hero" data-word="SESSION">
+    <div><div class="label"><b>01</b> // SESSION // <span id="today"></span></div></div>
+    <div class="clock"><span id="clock">--:--</span><small>LOCAL TIME</small></div>
+  </div>
+
+  <div class="grid">
+    <div class="panel" data-word="VAULT">
+      <div class="label"><b>02</b> // VAULT</div>
+      <div class="stat"><span>INBOX</span><span class="n">3</span></div>
+      <div class="stat"><span>TODO · OPEN</span><span class="n">7</span></div>
+      <div class="stat"><span>IDEAS</span><span class="n">12</span></div>
+      <div class="stat"><span>NOTES</span><span class="n">28</span></div>
+    </div>
+
+    <div class="panel" data-word="RECENT">
+      <div class="label"><b>03</b> // RECENT CAPTURES</div>
+      <div class="row"><div><span class="date">09-11</span><a class="t" href="#">把 dashboard 的主题令牌抽成公共设计语言</a>
+        <span class="tag">design</span></div><span class="m">idea</span></div>
+      <div class="row"><div><span class="date">09-10</span><a class="t" href="#">内嵌字体改为 GB2312 子集 woff2</a>
+        <span class="tag">perf</span></div><span class="m">note</span></div>
+      <div class="row"><div><span class="date">09-09</span><a class="t serif" href="#">读一遍官方封面，提炼构图手法</a></div>
+        <span class="m">note</span></div>
+    </div>
+
+    <div class="panel" data-word="TODOS">
+      <div class="label"><b>04</b> // OPEN TODOS</div>
+      <div class="row"><div><span class="date">09-12</span><a class="t" href="#">把令牌同步进生产项目</a></div>
+        <span class="m">open <span class="due overdue">due 2026-09-12</span></span></div>
+      <div class="row done"><div><span class="date">09-08</span><a class="t" href="#">校对暗色态对比度</a></div>
+        <span class="m">done</span></div>
+    </div>
+  </div>
+
+  <div class="statusbar"><span>3NDM1N15T4T0R v1.0.0</span><span>LAST BUILD <span id="built">—</span></span></div>
+</div>
+
+<script>
+(function(){
+  // —— 时钟：等宽数字（tabular-nums）避免跳字
+  var c=document.getElementById('clock');
+  function t(){var d=new Date();
+    c.childNodes[0].nodeValue=('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);}
+  t();setInterval(t,60000);
+  document.getElementById('today').textContent=new Date().toISOString().slice(0,10);
+  document.getElementById('built').textContent=new Date().toISOString().slice(0,16).replace('T',' ');
+
+  var rm=false;try{rm=window.matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){}
+
+  // —— 主题：auto / dark / light（令牌整体切换，不重绘）
+  var modes=['auto','dark','light'];
+  function mcur(){try{return localStorage.getItem('el-demo-theme')||'auto'}catch(e){return 'auto'}}
+  var tb=document.getElementById('themebtn');
+  function paint(){tb.textContent='THEME: '+mcur().toUpperCase()}
+  tb.addEventListener('click',function(){
+    var nx=modes[(modes.indexOf(mcur())+1)%modes.length];
+    if(nx==='auto'){try{localStorage.removeItem('el-demo-theme')}catch(e){}
+      document.documentElement.removeAttribute('data-theme')}
+    else{try{localStorage.setItem('el-demo-theme',nx)}catch(e){}
+      document.documentElement.setAttribute('data-theme',nx)}
+    paint();
+  });
+  paint();
+
+  // —— 密度：2/3/4 列（对应官方档案页的 Column − 3 + 仪表交互）
+  var db=document.getElementById('densitybtn');
+  function dcur(){var v=parseInt((function(){try{return localStorage.getItem('el-demo-density')||'3'}catch(e){return '3'}})(),10);
+    return (v===2||v===3||v===4)?v:3}
+  function dpaint(){var n=dcur();db.textContent='DENSITY: '+n;
+    document.documentElement.style.setProperty('--cols',n)}
+  db.addEventListener('click',function(){
+    var nx=dcur()>=4?2:dcur()+1;
+    try{localStorage.setItem('el-demo-density',''+nx)}catch(e){}
+    dpaint();
+  });
+  dpaint();
+
+  // —— 启动加载动画
+  //  时序：progress 900ms(easeOutCubic) → expand 300ms → fade 300ms，总 1500ms
+  //  短版（切换主题进入时）：350 / 300 / 200 = 850ms
+  //  六条工程约束：墙钟推导 / 双时钟 / 保险丝 / 幂等 / pointer-events+aria / reduced-motion 跳过
+  function playLoader(short){
+    if(document.getElementById('elayout'))return;              // 幂等
+    var full=short?850:1500,tp=short?350:900,te=300,tf=full-tp-te;
+    var el=document.createElement('div');
+    el.id='elayout';el.className='eloader';el.setAttribute('aria-hidden','true');
+    el.innerHTML='<div class="erail"></div><div class="eread">000%<br>LOADING</div>'
+      +'<div class="ebrand">END<br>FIELD</div>';
+    document.body.appendChild(el);
+    var rail=el.querySelector('.erail'),read=el.querySelector('.eread'),
+        t0=Date.now(),done=false;
+    function finish(){if(done)return;done=true;clearInterval(iv);
+      if(el.parentNode)el.parentNode.removeChild(el)}
+    function frame(){                                          // 墙钟推导，不逐帧累加
+      if(done)return;
+      var t=Date.now()-t0;
+      if(t<=tp){
+        var k=1-Math.pow(1-t/tp,3),pct=Math.min(100,Math.round(k*100));
+        rail.style.height=pct+'%';
+        read.style.top=Math.min(94,pct)+'%';                   // 下边界钳位 94%
+        read.innerHTML=('00'+pct).slice(-3)+'%<br>LOADING';
+      }else if(t<=tp+te){
+        rail.style.height='100%';rail.style.width=(10+90*(t-tp)/te)+'vw';read.style.display='none';
+      }else if(t<=full){
+        el.style.opacity=String(Math.max(0,1-(t-tp-te)/tf));
+      }else{finish()}
+    }
+    var iv=setInterval(frame,50);                              // 兜底时钟
+    if(window.requestAnimationFrame)(function loop(){
+      if(done)return;frame();requestAnimationFrame(loop)})();   // 平滑时钟
+    setTimeout(finish,full+800);                               // 硬性保险丝
+  }
+  if(!rm)playLoader(false);                                    // 每次进页播放；reduced-motion 跳过
+  document.getElementById('replaybtn').addEventListener('click',function(){playLoader(false)});
+})();
+</script>
+</body>
+</html>
