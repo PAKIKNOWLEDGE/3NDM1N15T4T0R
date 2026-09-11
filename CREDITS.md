@@ -49,9 +49,23 @@
 此处提供的是 **GB2312 子集** woff2（Regular / Bold，各 < 1MB），
 用于本设计语言的预览与落地；字符集外的字符会回退到系统字体。
 
-## 4. 致谢
+## 4. 其他第三方内容
+
+| 内容 | 位置 | 许可 | 说明 |
+| --- | --- | --- | --- |
+| ReEnd-Components 令牌文件 | `assets/ui-kits/reend-components/` | **MIT**（© 2025 VBeatDead） | `tailwind-preset.ts`、`index.css` 原样收录，许可原文随附 |
+| endfield-gacha-app 令牌文件 | `assets/ui-kits/endfield-gacha-app/` | **MIT** | `theme.js` 原样收录，许可原文随附 |
+| 官网素材 | `assets/official-site/` | 版权归鹰角网络 | 取自官网 CDN；分析结论见 `reference/official-site.md` |
+| Talos-Pioneers/ui | 仅 `reference/` 中的**文字引用** | **AGPL-3.0** | **未复制任何代码**；理由见 `reference/community-projects.md` |
+| Endfield Wiki（wiki.gg） | 仅 `reference/` 中的**链接引用** | 文字 CC BY-SA / 图像游戏版权 | 未收录其图片 |
+
+## 5. 致谢
 
 - 原始设计：**HYPERGRYPH / 鹰角网络** ——《明日方舟：终末地》视觉设计
 - 令牌化组织参考：**[ymh0000123/dsh-theme-endfield](https://github.com/ymh0000123/dsh-theme-endfield)**（MIT）
+- 设计系统印证：**[VBeatDead/ReEnd-Components](https://github.com/VBeatDead/ReEnd-Components)**（MIT）、
+  **[RoLingG/endfield-gacha-app](https://github.com/RoLingG/endfield-gacha-app)**（MIT）
+- 界面实现参考（未取代码）：**[Talos-Pioneers/ui](https://github.com/Talos-Pioneers/ui)**（AGPL-3.0）
 - 素材归档：[ignoredone.space](https://www.ignoredone.space/index.php/endfield_design/)
+- 资料索引：[Endfield Wiki](https://endfield.wiki.gg/)
 - 字体：**Huawei Device Co., Ltd.**

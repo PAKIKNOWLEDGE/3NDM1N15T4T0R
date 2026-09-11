@@ -273,3 +273,7 @@ background-image:
   `assets/fonts/LICENSE-HarmonyOS-Sans.txt`。
 - 构图手法提炼来源：[ignoredone.space · 终末地美术资源系统](https://www.ignoredone.space/index.php/endfield_design/)
   （封面走查得出方括号标题、底边裁切幽灵大字、左缘刻度尺、底边收边带四条手法）。
+- 官方站做法：[`reference/official-site.md`](reference/official-site.md)（像素采样配色 + 5 条可迁移做法）。
+- 社区实现印证：[`reference/community-projects.md`](reference/community-projects.md)——
+  ReEnd-Components（MIT）的 `--bracket-color` 与网格 alpha `.03`、endfield-gacha-app（MIT）的
+  亮/暗强调色 `#d9b500 / #fffa00`，分别与本仓库的方括号标题、暗色网格、accent 下潜规则一致。
